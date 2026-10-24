@@ -1,9 +1,0 @@
-{
-  "version": "2.0",
-  "logging": {
-    "applicationInsights": {
-      "samplingPercentage": 100
-    }
-  },
-  "functionTimeout": "00:05:00"
-}
