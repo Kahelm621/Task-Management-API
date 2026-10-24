@@ -1,46 +1,53 @@
 # Task Management API
 
-A serverless REST-style API for managing tasks, built with **Azure Functions** (Node.js) and **Azure Table Storage**. It supports basic CRUD (Create, Read, Update, Delete) operations for tasks.
+A serverless REST API for managing tasks, built with **Azure Functions** (Node.js, v4 programming model) and **Azure Table Storage**. It supports create, read, update, complete and delete operations.
 
-> This is a learning project and a work in progress. Some function folders are still the default Azure Functions templates.
+> Learning project. Tested locally with mocks; not deployed.
 
-## Features
-The HTTP-triggered handlers in `task-management-api/HttpTriggers/` cover:
-- Create a task (gets a generated ID and starts as not completed)
-- Get all tasks
-- Get a task by ID
-- Update a task
-- Mark a task as complete
-- Delete a task
+## Endpoints
+| Method | Route | Function | What it does |
+|---|---|---|---|
+| POST | `/api/tasks` | CreateTask | Create a task (gets a generated `id`, starts `completed: false`) |
+| GET | `/api/tasks` | GetAllTasks | List all tasks |
+| GET | `/api/tasks/{id}` | GetTaskById | Get one task |
+| PUT / PATCH | `/api/tasks/{id}` | UpdateTask | Update fields on a task |
+| POST | `/api/tasks/{id}/complete` | CompleteTask | Mark a task complete |
+| DELETE | `/api/tasks/{id}` | DeleteTask | Delete a task |
 
-Tasks are stored in an Azure Table Storage table named `tasks`.
+Tasks live in an Azure Table named `tasks`; each task's `id` is used as both its partition key and row key.
 
 ## Tech Stack
-- JavaScript (Node.js)
-- Azure Functions
+- JavaScript (Node.js), Azure Functions v4 (`@azure/functions`)
 - Azure Table Storage (`@azure/data-tables`)
-- Jest-style unit test (`createTask/createTask.test.js`)
+- Jest for unit tests (with an in-memory fake table)
 
-## How to Run Locally
-Requirements: Node.js, [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local), and an Azure Storage account.
+## Run Locally
+Requirements: Node.js 18+, [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local) and [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) (local storage emulator) or a real storage account.
 
 ```bash
 git clone https://github.com/Kahelm621/Task-Management-API.git
-cd Task-Management-API/task-management-api
-npm install @azure/data-tables
-# Set AzureWebJobsStorage, StorageAccountName and StorageAccountKey in your local settings
-func start
+cd Task-Management-API
+npm install
+cp local.settings.example.json local.settings.json   # set AzureWebJobsStorage if not using Azurite
+npm start
+```
+
+Run the tests (no Azure account needed):
+```bash
+npm test
 ```
 
 ## Project Structure
 ```
-task-management-api/
-├── HttpTriggers/        # CRUD handlers backed by Azure Table Storage
-├── createTask/ getTasks/ getTaskById/ updateTask/ deleteTask/ completeTask/
-│                        # Function folders (function.json + index.js)
-├── models/Task.js
-├── services/            # Task and notification services
-├── utils/               # Auth middleware and DB config
-├── TaskManagementAPI/   # Azure Functions v4 project scaffold
-└── host.json
+Task-Management-API/
+├── src/
+│   ├── functions/        # One file per HTTP endpoint
+│   └── tableClient.js    # Shared Azure Table Storage client
+├── tests/tasks.test.js   # Jest tests using a fake table
+├── host.json
+├── local.settings.example.json
+└── package.json
 ```
+
+## License
+MIT. See [LICENSE](LICENSE).
