@@ -1,13 +1,16 @@
-const { app } = require('@azure/functions');
+const { app } = require("@azure/functions");
+const { getTableClient } = require("../tableClient");
 
-app.http('DeleteTask', {
-    methods: ['GET', 'POST'],
-    authLevel: 'anonymous',
-    handler: async (request, context) => {
-        context.log(`Http function processed request for url "${request.url}"`);
+async function deleteTask(request, context) {
+  const id = request.params.id;
+  try {
+    await getTableClient().deleteEntity(id, id);
+    return { status: 200, body: "Task deleted successfully" };
+  } catch (error) {
+    return { status: 404, body: "Task not found" };
+  }
+}
 
-        const name = request.query.get('name') || await request.text() || 'world';
+app.http("DeleteTask", { methods: ["DELETE"], authLevel: "anonymous", route: "tasks/{id}", handler: deleteTask });
 
-        return { body: `Hello, ${name}!` };
-    }
-});
+module.exports = { deleteTask };

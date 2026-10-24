@@ -1,13 +1,19 @@
-const { app } = require('@azure/functions');
+const { app } = require("@azure/functions");
+const { getTableClient, keysFor } = require("../tableClient");
 
-app.http('CreateTask', {
-    methods: ['GET', 'POST'],
-    authLevel: 'anonymous',
-    handler: async (request, context) => {
-        context.log(`Http function processed request for url "${request.url}"`);
+async function createTask(request, context) {
+  try {
+    const body = await request.json();
+    const id = Date.now().toString(); // simple ID generation
+    const task = { ...body, id, completed: false, ...keysFor(id) };
+    await getTableClient().createEntity(task);
+    return { status: 201, jsonBody: task };
+  } catch (error) {
+    context.error(error);
+    return { status: 500, body: "Error creating task" };
+  }
+}
 
-        const name = request.query.get('name') || await request.text() || 'world';
+app.http("CreateTask", { methods: ["POST"], authLevel: "anonymous", route: "tasks", handler: createTask });
 
-        return { body: `Hello, ${name}!` };
-    }
-});
+module.exports = { createTask };

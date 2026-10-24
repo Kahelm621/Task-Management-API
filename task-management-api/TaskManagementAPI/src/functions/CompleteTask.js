@@ -1,13 +1,19 @@
-const { app } = require('@azure/functions');
+const { app } = require("@azure/functions");
+const { getTableClient } = require("../tableClient");
 
-app.http('CompleteTask', {
-    methods: ['GET', 'POST'],
-    authLevel: 'anonymous',
-    handler: async (request, context) => {
-        context.log(`Http function processed request for url "${request.url}"`);
+async function completeTask(request, context) {
+  const id = request.params.id;
+  try {
+    const client = getTableClient();
+    const task = await client.getEntity(id, id);
+    task.completed = true;
+    await client.updateEntity(task, "Merge");
+    return { status: 200, jsonBody: task };
+  } catch (error) {
+    return { status: 404, body: "Task not found" };
+  }
+}
 
-        const name = request.query.get('name') || await request.text() || 'world';
+app.http("CompleteTask", { methods: ["POST"], authLevel: "anonymous", route: "tasks/{id}/complete", handler: completeTask });
 
-        return { body: `Hello, ${name}!` };
-    }
-});
+module.exports = { completeTask };

@@ -1,16 +1,18 @@
 {
-  "name": "",
+  "name": "task-management-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Serverless task CRUD API on Azure Functions (Node.js v4) and Azure Table Storage",
   "main": "src/functions/*.js",
   "scripts": {
     "start": "func start",
-    "test": "echo \"No tests yet...\""
+    "test": "jest"
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0"
+    "@azure/functions": "^4.0.0",
+    "@azure/data-tables": "^13.2.2"
   },
   "devDependencies": {
-    "azure-functions-core-tools": "^4.x"
+    "azure-functions-core-tools": "^4.x",
+    "jest": "^29.7.0"
   }
 }
